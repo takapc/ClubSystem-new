@@ -1,0 +1,36 @@
+{% extends "bootstrap/base.html" %} {% import "bootstrap/wtf.html" as wtf %} {%
+block title %}Pythonアプリケーション開発{% endblock %} {% block navbar %}
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>学籍番号</th>
+            <th>学年</th>
+            <th>組</th>
+            <th>番号</th>
+            <th>名前</th>
+            <th>ステータス</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in persons %}
+        <tr>
+            <th>{{p.idm}}</td>
+            <th>{{p.id}}</th>
+            <th>{{p.grade}}</th>
+            <th>{{p.class}}</th>
+            <th>{{p.number}}</th>
+            <td>{{p.name}}</td>
+            {% if p.status == -1 %}
+            <th class="danger">退室中</th>
+            {% else %}
+            <th class="success">入室中</th>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<button onclick="location.href='/name'" class="btn btn-success btn-default btn-block">新規登録</button>
+{% endblock %} {% block content %}
+<div class="container">{% block page_content %}{% endblock %}</div>
+{% endblock %}
