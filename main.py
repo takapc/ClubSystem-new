@@ -22,15 +22,18 @@ def index():
 
 @app.route('/handle')
 def handle():
-    clf = nfc.ContactlessFrontend('usb')
-    tag = clf.connect(rdwr={'on-connect': lambda tag: False})
-    idm = binascii.hexlify(tag.idm).decode('utf-8')
-    clf.close()
+    try:
+        clf = nfc.ContactlessFrontend('usb')
+        tag = clf.connect(rdwr={'on-connect': lambda tag: False})
+        idm = binascii.hexlify(tag.idm).decode('utf-8')
+        clf.close()
 
-    con = sqlite3.connect(DATABASE)
-    con.execute('UPDATE PERSONS SET STATUS = STATUS * -1 WHERE IDM = "' + idm + '"')
-    con.commit()
-    con.close()
+        con = sqlite3.connect(DATABASE)
+        con.execute('UPDATE PERSONS SET STATUS = STATUS * -1 WHERE IDM = "' + idm + '"')
+        con.commit()
+        con.close()
+    except AttributeError:
+        pass
 
     return redirect(url_for('index'))
 
@@ -49,16 +52,20 @@ def user_register():
     _number = request.form['number']
     _id = request.form['id']
 
-    clf = nfc.ContactlessFrontend('usb')
-    tag = clf.connect(rdwr={'on-connect': lambda tag: False})
-    _idm = binascii.hexlify(tag.idm).decode('utf-8')
-    clf.close()
+    try:
+        clf = nfc.ContactlessFrontend('usb')
+        tag = clf.connect(rdwr={'on-connect': lambda tag: False})
+        _idm = binascii.hexlify(tag.idm).decode('utf-8')
+        clf.close()
 
-    con = sqlite3.connect(DATABASE)
-    con.execute('INSERT INTO PERSONS VALUES(?, ?, ?, ?, ?, ?, ?)',
+        con = sqlite3.connect(DATABASE)
+        con.execute('INSERT INTO PERSONS VALUES(?, ?, ?, ?, ?, ?, ?)',
                  [_idm, _name, _grade, _class, _number, -1, _id])
-    con.commit()
-    con.close()
+        con.commit()
+        con.close()
+    except AttributeError:
+        pass
+
 
 
     return redirect(url_for('index'))
