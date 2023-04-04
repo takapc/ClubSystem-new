@@ -4,24 +4,24 @@ block title %}入退室管理画面{% endblock %} {% block navbar %}
     <thead>
         <tr>
             <th>ID</th>
-            <th>学籍番号</th>
             <th>学年</th>
             <th>組</th>
             <th>番号</th>
             <th>名前</th>
+            <th>時刻</th>
             <th>ステータス</th>
         </tr>
     </thead>
     <tbody>
         {% for p in persons %}
         <tr>
-            <th>{{p.idm}}</td>
-            <th>{{p.id}}</th>
+            <th>{{p.idm}}</th>
             <th>{{p.grade}}</th>
             <th>{{p.class}}</th>
-            <th>{{p.number}}</th>
+            <th>{{p.atdNum}}</th>
             <td>{{p.name}}</td>
-            {% if p.status == -1 %}
+            <td>{{p.datetime}}</td>
+            {% if not p.status %}
             <th class="danger">退室中</th>
             {% else %}
             <th class="success">入室中</th>
@@ -32,4 +32,9 @@ block title %}入退室管理画面{% endblock %} {% block navbar %}
 </table>
 <button onclick="location.href='/name'" class="btn btn-success btn-default btn-block">新規登録</button>
 <button onclick="location.href='/handle'" class="btn btn-info btn-default btn-block">読み込む</button>
+<script>
+    setInterval(() => {
+        location.reload()
+    }, 500)
+</script>
 {% endblock %}
