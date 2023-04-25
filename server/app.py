@@ -1,15 +1,16 @@
 from flask import Flask, redirect, render_template, request, url_for, jsonify
 import sqlite3
-from felica.app import readIDm
 from flask_bootstrap import Bootstrap
-import requests
 import datetime
+from server.felica import readIDm, ReadIDm
 
 DATABASE = 'server/database.db'
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
-
+thread_readIDm = ReadIDm(3)
+thread_readIDm.setDaemon(True)
+thread_readIDm.start()
 
 @app.route('/')
 async def index():
@@ -22,6 +23,28 @@ async def index():
         'index.html',
         persons=db_users
     )
+
+@app.route('/userStatus')
+async def userStatus():
+    con = sqlite3.connect(DATABASE)
+    cur = con.cursor()
+    db_users = cur.execute('SELECT logs.idm, status, datetime FROM logs JOIN users ON logs.idm = users.idm JOIN ( SELECT idm, MAX(id) AS latestId FROM logs GROUP BY idm ) latestLogs ON logs.idm = latestLogs.idm AND logs.id = latestLogs.latestId').fetchall()
+    con.close()
+    return jsonify(db_users)
+
+@app.route('/isReadActive')
+def isReadActive():
+    return jsonify({'isReadActive': thread_readIDm.alive})
+
+@app.route('/readActivate')
+def readActivate():
+    thread_readIDm.begin()
+    return jsonify({'isReadActive': thread_readIDm.alive})
+
+@app.route('/readDeactivate')
+def readDeactivate():
+    thread_readIDm.stop()
+    return jsonify({'isReadActive': thread_readIDm.alive})
 
 @app.route('/checkin', methods=['POST'])
 async def handle():
@@ -52,10 +75,13 @@ async def user_register():
     _grade = request.form['grade']
     _class = request.form['class']
     _atdNum = request.form['atdNum']
-        
-    requests.get("http://localhost:5000/felica/stop")
-    _idm = readIDm()
-    requests.get("http://localhost:5000/felica/start")
+    
+    if thread_readIDm.alive:
+        thread_readIDm.stop()
+        _idm = readIDm()
+        thread_readIDm.begin()
+    else:
+        _idm = readIDm()
 
     try:
         con = sqlite3.connect(DATABASE)
@@ -69,3 +95,4 @@ async def user_register():
         pass
 
     return redirect(url_for('index'))
+
