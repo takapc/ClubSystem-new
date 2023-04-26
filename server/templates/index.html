@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% extends "bootstrap/base.html" %} {% import "bootstrap/wtf.html" as wtf %} {%
+        block title %}入退室管理画面{% endblock %} {% block navbar %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>学年</th>
+                    <th>組</th>
+                    <th>番号</th>
+                    <th>名前</th>
+                    <th>時刻</th>
+                    <th>ステータス</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in persons %}
+                <tr>
+                    <th>{{p.idm}}</th>
+                    <th>{{p.grade}}</th>
+                    <th>{{p.class}}</th>
+                    <th>{{p.atdNum}}</th>
+                    <td>{{p.name}}</td>
+                    <td id="{{p.idm}}_date">{{p.datetime}}</td>
+                    {% if not p.status %}
+                    <th class="danger" id="{{p.idm}}_status">退室中</th>
+                    {% else %}
+                    <th class="success" id="{{p.idm}}_status">入室中</th>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button onclick="location.href='/name'" class="btn btn-success btn-default btn-block">新規登録</button>
+        <button onclick="readStatusChange()" class="btn btn-info btn-default btn-block" id="readStartButton">読み込み開始</button>
+        <script>
+            let readStatus = false
+            fetch("http://localhost:5000/isReadActive").then(res => res.json()).then(data => {
+                readStatus = data.isReadActive
+                const readStartButton = document.getElementById("readStartButton")
+                if (readStatus) {
+                    readStartButton.textContent = '読み込み終了'
+                    readStartButton.classList.remove("btn-info")
+                    readStartButton.classList.add("btn-danger")
+                } else {
+                    readStartButton.textContent = '読み込み開始'
+                    readStartButton.classList.remove("btn-danger")
+                    readStartButton.classList.add("btn-info")
+                }
+            })
+            
+            const readStatusChange = async () => {
+                readStatus = !readStatus
+                const res = await fetch(`http://localhost:5000/${readStatus ? "readActivate": "readDeactivate" }`)
+                readStatus = (await res.json()).isReadActive
+                const readStartButton = document.getElementById("readStartButton")
+                if (readStatus) {
+                    readStartButton.textContent = '読み込み終了'
+                    readStartButton.classList.remove("btn-info")
+                    readStartButton.classList.add("btn-danger")
+                } else {
+                    readStartButton.textContent = '読み込み開始'
+                    readStartButton.classList.remove("btn-danger")
+                    readStartButton.classList.add("btn-info")
+                }
+            }
+
+            setInterval(() => {
+                if (!readStatus)return
+                fetch("http://localhost:5000/userStatus")
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(e => {
+                    document.getElementById(`${e[0]}_status`).textContent = e[1] == 1 ? "入室中" : "退室中"
+                    document.getElementById(`${e[0]}_status`).className = e[1] == 1 ? "success" : "danger"
+                    document.getElementById(`${e[0]}_date`).textContent = e[2]
+                    })
+                })
+                
+            },500)
+        </script>
+        {% endblock %}
+</body>
+</html>
