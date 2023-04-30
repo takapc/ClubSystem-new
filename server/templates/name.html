@@ -1,48 +1,80 @@
-{% extends "bootstrap/base.html" %} {% import "bootstrap/wtf.html" as wtf %} {%
-block title %}新規登録画面{% endblock %} {% block navbar %}
-<div class="container bg-info">
-    <form method="post" action="{{ url_for('user_register') }}">
-        <div class="form-group">
-            <label for="InputName">名前</label>
-            <input
-                type="text"
-                class="form-control"
-                id="InputNmae"
-                name="name"
-                placeholder="名前を入力して下さい。 (名字と名前の間に空白は開けない)"
-            />
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新規登録画面</title>
+</head>
+<body>
+    {% extends "bootstrap/base.html" %} {% import "bootstrap/wtf.html" as wtf %} {%
+        block title %}新規登録画面{% endblock %} {% block navbar %}
+        <div class="container bg-info" style="padding: 20px;">
+            <form id="form" method="post" action="{{ url_for('user_register') }}">
+                <div class="form-group">
+                    <label for="InputName">名前</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="InputNmae"
+                        name="name"
+                        placeholder="名前を入力して下さい。 (名字と名前の間に空白は開けない)"
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="InputGrade">学年</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="InputGrade"
+                        name="grade"
+                        placeholder="学年を入力して下さい。 例)中2の場合 -> 2 高一の場合 -> 4"
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="InputClass">組</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="InputClass"
+                        name="class"
+                        placeholder="組を入力してください。 例)5組の場合 -> 5"
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="InputNumber">番号</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="InputNumber"
+                        name="atdNum"
+                        placeholder="クラス内の番号を入力してください。 例)26番の場合 -> 26"
+                    />
+                </div>
+                <div class="form-check">
+                    <input 
+                        type="checkbox" 
+                        class="form-check-input"
+                        id="noCardCheckbox"
+                        name="noCard"
+                        onclick="handleClick()"
+                    />
+                    <label class="form-check-label" for="flexCheckDefault">ICカードを利用しない</label>
+                </div>
+                <input type="submit" value="カードを読み込む!" id="sendButton" class="btn"/>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="InputGrade">学年</label>
-            <input
-                type="text"
-                class="form-control"
-                id="InputGrade"
-                name="grade"
-                placeholder="学年を入力して下さい。 例)中2の場合 -> 2 高一の場合 -> 4"
-            />
-        </div>
-        <div class="form-group">
-            <label for="InputClass">組</label>
-            <input
-                type="text"
-                class="form-control"
-                id="InputClass"
-                name="class"
-                placeholder="組を入力してください。 例)5組の場合 -> 5"
-            />
-        </div>
-        <div class="form-group">
-            <label for="InputNumber">番号</label>
-            <input
-                type="text"
-                class="form-control"
-                id="InputNumber"
-                name="atdNum"
-                placeholder="クラス内の番号を入力してください。 例)26番の場合 -> 26"
-            />
-        </div>
-        <input type="submit" value="カードを読み込む!" />
-    </form>
-</div>
-{% endblock %}
+        <script>
+            const handleClick = () => {
+                if (document.getElementById("noCardCheckbox").checked) {
+                    document.getElementById("form").action = "/user_register_no_card"
+                    document.getElementById("sendButton").value = "カードなしで登録！"
+                } else {
+                    document.getElementById("form").action = "/user_register"
+                    document.getElementById("sendButton").value = "カードを読み込む!"
+                }
+            }
+        </script>
+        {% endblock %}
+</body>
+</html>

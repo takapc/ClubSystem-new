@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>入退室管理画面</title>
 </head>
 <body>
     {% extends "bootstrap/base.html" %} {% import "bootstrap/wtf.html" as wtf %} {%
@@ -12,28 +12,28 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <!-- <th>ID</th> -->
                     <th>学年</th>
                     <th>組</th>
                     <th>番号</th>
                     <th>名前</th>
-                    <th>時刻</th>
+                    <th>日時</th>
                     <th>ステータス</th>
                 </tr>
             </thead>
             <tbody>
                 {% for p in persons %}
                 <tr>
-                    <th>{{p.idm}}</th>
+                    <!-- <th>{{p.idm}}</th> -->
                     <th>{{p.grade}}</th>
                     <th>{{p.class}}</th>
                     <th>{{p.atdNum}}</th>
                     <td>{{p.name}}</td>
                     <td id="{{p.idm}}_date">{{p.datetime}}</td>
                     {% if not p.status %}
-                    <th class="danger" id="{{p.idm}}_status">退室中</th>
+                    <th class="danger" id="{{p.idm}}_status", onclick="handleClick('{{p.idm}}')">退室中</th>
                     {% else %}
-                    <th class="success" id="{{p.idm}}_status">入室中</th>
+                    <th class="success" id="{{p.idm}}_status", onclick="handleClick('{{p.idm}}')">入室中</th>
                     {% endif %}
                 </tr>
                 {% endfor %}
@@ -73,6 +73,18 @@
                 }
             }
 
+            const handleClick = idm => {
+                fetch(`http://localhost:5000/checkin/${idm}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(e => {
+                    document.getElementById(`${e[0]}_status`).textContent = e[1] == 1 ? "入室中" : "退室中"
+                    document.getElementById(`${e[0]}_status`).className = e[1] == 1 ? "success" : "danger"
+                    document.getElementById(`${e[0]}_date`).textContent = e[2]
+                    })
+                })
+            }
+
             setInterval(() => {
                 if (!readStatus)return
                 fetch("http://localhost:5000/userStatus")
@@ -84,7 +96,6 @@
                     document.getElementById(`${e[0]}_date`).textContent = e[2]
                     })
                 })
-                
             },500)
         </script>
         {% endblock %}
